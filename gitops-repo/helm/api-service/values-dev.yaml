@@ -1,0 +1,8 @@
+# Dev overrides - auto-deploy by CI
+image:
+  repository: "# TODO: override with ECR API repo URL"
+  tag: "" # replaced by CI
+  pullPolicy: IfNotPresent
+replicaCount: 1
+hpa:
+  enabled: false

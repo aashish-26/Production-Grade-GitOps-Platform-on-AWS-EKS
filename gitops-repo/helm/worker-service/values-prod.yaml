@@ -1,0 +1,14 @@
+# Prod overrides for worker
+image:
+  repository: "# TODO: set with ECR repo URL for worker"
+  tag: ""
+replicaCount: 2
+keda:
+  minReplicaCount: 2
+  maxReplicaCount: 50
+imageUpdater:
+  enabled: false
+serviceAccount:
+  annotations:
+    # TODO: set production IRSA role ARN here
+    {}

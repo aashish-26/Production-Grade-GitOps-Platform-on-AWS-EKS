@@ -1,0 +1,179 @@
+Step-by-Step Implementation Plan
+Phase 1 – Infrastructure (Terraform)
+
+Create:
+
+VPC (public + private subnets)
+
+EKS cluster
+
+Node groups
+
+ECR
+
+SQS
+
+IAM roles (IRSA)
+
+Commands:
+
+terraform init
+terraform apply
+Phase 2 – Kubernetes Base Setup
+
+Install ArgoCD:
+
+kubectl create ns argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+Install monitoring:
+
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+helm install monitoring prometheus-community/kube-prometheus-stack
+
+Install Loki:
+
+helm install loki grafana/loki-stack
+
+Create namespaces:
+
+kubectl create ns dev
+kubectl create ns staging
+kubectl create ns prod
+Phase 3 – Application Setup
+
+Build 2 services:
+
+API Service
+
+Accept request
+
+Push to SQS
+
+Worker Service
+
+Consume SQS
+
+Process jobs
+
+Phase 4 – CI Pipeline
+name: CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build
+        run: docker build -t app .
+
+      - name: Scan
+        run: trivy image app
+
+      - name: Push to ECR
+        run: docker push <ECR_URL>
+
+      - name: Update GitOps Repo
+        run: |
+          sed -i 's/tag:.*/tag: new-tag/' values-dev.yaml
+Phase 5 – GitOps Setup
+
+Create Helm chart
+
+Create env-specific values
+
+ArgoCD App of Apps:
+
+One parent app
+
+Child apps for each env
+
+Phase 6 – Auto Image Update
+
+Install:
+
+kubectl apply -f image-updater.yaml
+
+Annotate apps with image repo.
+
+Phase 7 – Deployment Strategy
+
+dev → auto sync
+
+staging → PR-based
+
+prod → manual approval
+
+Phase 8 – Autoscaling
+
+HPA:
+
+kubectl autoscale deployment api --cpu-percent=50 --min=2 --max=10
+
+KEDA:
+
+Trigger: SQS queue length
+
+Phase 9 – Monitoring
+
+Create Grafana dashboards:
+
+CPU
+
+Memory
+
+Request rate
+
+Queue depth
+
+Phase 10 – Failure + Rollback
+
+Deploy broken version
+
+Argo shows unhealthy
+
+Rollback via UI or CLI
+
+6. Project Folder Structure
+Repo 1 – Application
+app-repo/
+  api/
+    src/
+    Dockerfile
+  worker/
+    src/
+    Dockerfile
+  .github/workflows/
+    ci.yaml
+Repo 2 – Infrastructure
+infra-repo/
+  terraform/
+    main.tf
+    variables.tf
+    outputs.tf
+  modules/
+    vpc/
+    eks/
+    ecr/
+    sqs/
+Repo 3 – GitOps
+gitops-repo/
+  helm/
+    api-service/
+    worker-service/
+  environments/
+    dev/
+      values.yaml
+    staging/
+      values.yaml
+    prod/
+      values.yaml
+  argocd/
+    app-of-apps.yaml

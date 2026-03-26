@@ -1,0 +1,19 @@
+# Ingress will be created via AWS ALB Ingress Controller. Add annotations as needed for cert-manager, access logs, WAF, etc.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "api-service.fullname" . }}-ingress
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "api-service.fullname" . }}
+                port:
+                  number: {{ .Values.service.port }}

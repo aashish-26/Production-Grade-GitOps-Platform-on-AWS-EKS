@@ -1,0 +1,16 @@
+# Staging overrides
+image:
+  repository: "# TODO: set with ECR repo URL for api"
+  tag: "" # CI will update with commit SHA on promotion
+replicaCount: 2
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+imageUpdater:
+  enabled: true
+serviceAccount:
+  annotations:
+    # TODO: annotate with eks.amazonaws.com/role-arn for IRSA if using
+    # eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/ExternalSecretsRole
+    {}

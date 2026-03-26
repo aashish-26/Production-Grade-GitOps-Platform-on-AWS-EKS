@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "api-service.fullname" . }}
+  labels:
+    app: {{ include "api-service.name" . }}
+  annotations: |
+    {{- with .Values.imageUpdater.annotations }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "api-service.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "api-service.name" . }}
+    spec:
+      serviceAccountName: {{ default (include "api-service.fullname" .) .Values.serviceAccount.name }}
+      containers:
+        - name: api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.path }}
+              port: {{ .Values.readinessProbe.port }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.path }}
+              port: {{ .Values.livenessProbe.port }}
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+          env:
+            - name: SQS_QUEUE_URL
+              value: "{{ .Values.sqs.queueUrl }}"
+            - name: AWS_REGION
+              value: "{{ .Values.awsRegion }}"

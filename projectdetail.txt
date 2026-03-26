@@ -1,0 +1,133 @@
+GitOps Platform — Project Details
+
+1. Executive summary
+This document describes a GitOps deployment platform for microservices on AWS. It explains the problem the platform solves, the required components, why each component is used, and the end-to-end deployment flow.
+
+2. Problem statement
+- Multiple services must be deployed together safely, repeatably, and audibly.
+- Systems must handle failures, scaling, and traffic spikes.
+- Teams need a reproducible and auditable deployment model.
+
+What this platform provides
+- Automated CI → image build → secure registry → GitOps deployments.
+- Reliable design with decoupled services and queue-based processing.
+- Horizontal scaling using HPA and event-driven autoscaling (KEDA).
+- Observability (metrics, dashboards, logs) and image security scanning.
+
+3. Key concept: GitOps vs Traditional CI/CD
+- Traditional: CI builds and the pipeline contains deployment logic that applies manifests directly to the cluster.
+- GitOps: CI builds artifacts and updates Git (Helm values or manifests). ArgoCD (or equivalent) continuously reconciles the cluster from Git. Git is the single source of truth.
+
+4. End-to-end flow (high level)
+1) Developer pushes code to GitHub.
+2) GitHub Actions run lint, tests, build Docker image, and run Trivy scans.
+3) CI pushes the image to ECR and updates the GitOps repo with the new image tag.
+4) ArgoCD detects the Git change and deploys to EKS using the App-of-Apps pattern.
+5) API receives traffic through ALB and may enqueue background jobs to SQS.
+6) Worker pods consume SQS messages and scale via KEDA.
+7) Prometheus, Grafana, and Loki provide monitoring and logging.
+
+5. Components required (concise)
+
+Infrastructure (AWS)
+- VPC (public/private subnets)
+- EKS (managed Kubernetes)
+- ECR (container registry)
+- SQS (message queue)
+- ALB (ingress)
+- IAM roles + IRSA for pod access
+- AWS Secrets Manager (with External Secrets operator)
+
+CI / CD
+- GitHub Actions pipeline: lint, test, build, Trivy scan, push to ECR, update GitOps repo
+
+GitOps
+- ArgoCD (App-of-Apps)
+- ArgoCD Image Updater (optional)
+
+Kubernetes
+- Namespaces: dev, staging, prod
+- Helm charts for services
+- Deployments: API, Workers
+- Services: ClusterIP for internal, ALB Ingress for external
+
+Scaling
+- HPA (CPU/memory-based autoscaling)
+- KEDA (event/queue-based autoscaling for workers)
+
+Observability & Security
+- Prometheus (metrics), Grafana (dashboards)
+- Loki (logs)
+- Trivy (image scanning)
+- External Secrets (sync secrets from AWS Secrets Manager)
+
+6. Why each component is used (short)
+- EKS: offload control plane management and leverage managed Kubernetes.
+- VPC: isolate networks and control traffic.
+- ECR: secure, private image registry.
+- SQS: decouple producers and consumers; buffer traffic spikes.
+- ALB: managed HTTP/S ingress and lifecycle integration with EKS.
+- GitHub Actions: automated CI pipeline.
+- ArgoCD: continuous reconciliation from Git (GitOps).
+- Helm: templatized manifests per environment.
+- HPA: scale on resource usage.
+- KEDA: scale workers on queue depth or event sources.
+- Prometheus/Grafana/Loki: metrics, dashboards and centralized logging for observability.
+- Trivy: prevent vulnerable images from reaching cluster.
+- External Secrets: avoid embedding secrets in manifests.
+
+7. Environments and namespace mapping
+- dev — fast feedback, frequent deploys
+- staging — integration tests, pre-prod verification
+- prod — live traffic; controlled automated deploys via GitOps and protection rules
+
+8. Deployment & operational notes
+- Use App-of-Apps in ArgoCD to manage per-environment applications and group services.
+- Use image tags and immutable tags (SHA-based) in GitOps repo to ensure reproducible deploys.
+- Protect `prod` branch and require PR-based merges with CI checks.
+- Use IRSA and least-privilege IAM roles for pods that need AWS access.
+
+9. Architecture diagram (ASCII)
+
+  Developer
+          |
+          v
+  GitHub
+          |
+  GitHub Actions (CI)
+  [lint | test | build | trivy | push-to-ECR | update-gitops]
+          |
+          v
+  GitOps Repo (Helm values / manifests)
+          |
+          v
+  ArgoCD (App-of-Apps)
+          |
+  +----------------------+----------------------+------------------+
+  |        dev           |       staging        |      prod        |
+  +----------------------+----------------------+------------------+
+                                                                         |
+                                                                         v
+                                                                        EKS
+  +--------------------------------------------------------------------+
+  | ALB -> Ingress -> API Service -> Pods (stateless)                  |
+  |                             |                                      |
+  |                             v                                      |
+  |                           SQS Queue                                |
+  |                             |                                      |
+  |                             v                                      |
+  |                  Worker Pods (KEDA scales on queue depth)         |
+  |                                                                    |
+  |                (Optional) PostgreSQL / RDS outside cluster        |
+  +--------------------------------------------------------------------+
+         |                      |                     |
+         v                      v                     v
+ Prometheus           Grafana (dashboards)     Loki (logs)
+
+10. Quick checklist for CI pipeline
+- Run lint and unit tests
+- Build and tag image (use commit SHA)
+- Run Trivy scan; fail on high/critical
+- Push image to ECR
+- Update GitOps repo (Helm values or image manifest)
+- Create PR or merge to target branch to trigger ArgoCD

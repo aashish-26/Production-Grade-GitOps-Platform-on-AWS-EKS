@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prod-apps
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: "# TODO: ADD_GITOPS_REPO_URL"
+    targetRevision: HEAD
+    path: environments/prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: prod
+  syncPolicy:
+    # For production we recommend manual sync. Disable automated sync to force approvals via Git.
+    automated: null

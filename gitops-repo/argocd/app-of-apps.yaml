@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gitops-root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: "# TODO: ADD_GITOPS_REPO_URL"
+    targetRevision: HEAD
+    path: argocd/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
+  metadata:
+    annotations:
+      # Allow Image Updater to discover the apps; set actual image-list in child app manifests or here.
+      argocd-image-updater.argoproj.io/image-list: "api-service=${ECR_API_REPO},worker-service=${ECR_WORKER_REPO}"
+
+# Child app manifests should live in argocd/apps/ (dev.yaml, staging.yaml, prod.yaml)

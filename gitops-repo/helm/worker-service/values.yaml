@@ -1,0 +1,33 @@
+# Default values for worker-service
+replicaCount: 1
+image:
+  repository: "# TODO: set in env specific values"
+  tag: "latest"
+  pullPolicy: IfNotPresent
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+keda:
+  enabled: true
+  minReplicaCount: 1
+  maxReplicaCount: 10
+  pollingInterval: 30
+  cooldownPeriod: 300
+
+sqs:
+  queueUrl: ""
+awsRegion: "# TODO: set region"
+
+serviceAccount:
+  create: true
+  name: null
+  annotations: {}
+
+imageUpdater:
+  enabled: false
+  annotations: {}

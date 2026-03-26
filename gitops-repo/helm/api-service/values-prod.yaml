@@ -1,0 +1,15 @@
+# Prod overrides
+image:
+  repository: "# TODO: set with ECR repo URL for api"
+  tag: "" # Set to promoted immutable tag
+replicaCount: 3
+hpa:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 12
+imageUpdater:
+  enabled: false
+serviceAccount:
+  annotations:
+    # TODO: set production IRSA role ARN here
+    {}

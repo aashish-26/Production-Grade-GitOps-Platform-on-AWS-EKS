@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "worker-service.fullname" . }}
+  labels:
+    app: {{ include "worker-service.name" . }}
+  annotations: |
+    {{- with .Values.imageUpdater.annotations }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "worker-service.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "worker-service.name" . }}
+    spec:
+      serviceAccountName: {{ default (include "worker-service.fullname" .) .Values.serviceAccount.name }}
+      containers:
+        - name: worker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+          env:
+            - name: SQS_QUEUE_URL
+              value: "{{ .Values.sqs.queueUrl }}"
+            - name: AWS_REGION
+              value: "{{ .Values.awsRegion }}"

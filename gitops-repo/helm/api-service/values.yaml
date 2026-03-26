@@ -1,0 +1,42 @@
+# Default values for api-service
+replicaCount: 2
+image:
+  repository: "# TODO: set in environment specific values or replaced by CI"
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# Annotations consumed by ArgoCD Image Updater or other tooling
+imageUpdater:
+  enabled: false
+  annotations: {}
+service:
+  type: ClusterIP
+  port: 8080
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# KEDA/HPA related defaults
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 50
+
+# Liveness/readiness
+readinessProbe:
+  path: /health
+  port: 8080
+
+livenessProbe:
+  path: /health
+  port: 8080
+
+serviceAccount:
+  create: true
+  name: null
+  annotations: {}

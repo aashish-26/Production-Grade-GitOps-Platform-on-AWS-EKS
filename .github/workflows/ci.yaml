@@ -1,0 +1,71 @@
+# CI pipeline: build, scan, push, and update GitOps repo
+# - Uses OIDC to assume an AWS role for push to ECR
+# - Uses commit SHA as image tag (immutable tags)
+# TODO: ADD REPO URL and ROLE ARN where indicated below
+
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  id-token: write # required for OIDC
+  contents: read
+  packages: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }} # TODO: ADD ROLE ARN (create IAM role for OIDC assume)
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Set image variables
+        run: |
+          IMAGE_REPO_API=${{ secrets.ECR_API_REPO }} # TODO: USER_ACTION_REQUIRED set in repo secrets
+          IMAGE_TAG=${{ github.sha }}
+          echo "IMAGE_REPO_API=$IMAGE_REPO_API" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Build API image
+        run: |
+          docker build -t $IMAGE_REPO_API:$IMAGE_TAG -f app-repo/api/Dockerfile app-repo/api
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@v2
+        with:
+          image-ref: $IMAGE_REPO_API:${{ env.IMAGE_TAG }}
+          format: 'table'
+
+      - name: Push image to ECR
+        run: |
+          docker push $IMAGE_REPO_API:$IMAGE_TAG
+
+      - name: Update GitOps repo (helm values)
+        env:
+          GITOPS_REPO: ${{ secrets.GITOPS_REPO }} # TODO: ADD REPO URL
+          GITOPS_BRANCH: main
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+        run: |
+          # This step clones the GitOps repo, updates the values file for dev (example), and pushes a commit.
+          git clone $GITOPS_REPO gitops
+          cd gitops
+          git checkout $GITOPS_BRANCH || git checkout -b $GITOPS_BRANCH
+          # Update values-dev.yaml: replace image.tag
+          sed -i 's/tag:.*/tag: "'"$IMAGE_TAG"'"/' helm/api-service/values-dev.yaml
+          git add helm/api-service/values-dev.yaml
+          git commit -m "chore: update api image to $IMAGE_TAG [ci skip]"
+          git push origin HEAD:$GITOPS_BRANCH
+

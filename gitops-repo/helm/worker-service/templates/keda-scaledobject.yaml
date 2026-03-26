@@ -1,0 +1,20 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "worker-service.fullname" . }}
+  labels:
+    app: {{ include "worker-service.name" . }}
+spec:
+  scaleTargetRef:
+    name: {{ include "worker-service.fullname" . }}
+  pollingInterval: {{ .Values.keda.pollingInterval }}
+  cooldownPeriod: {{ .Values.keda.cooldownPeriod }}
+  minReplicaCount: {{ .Values.keda.minReplicaCount }}
+  maxReplicaCount: {{ .Values.keda.maxReplicaCount }}
+  triggers:
+    - type: aws-sqs-queue
+      metadata:
+        queueURL: "{{ .Values.sqs.queueUrl }}"
+        queueLength: "5"
+      authenticationRef:
+        name: keda-trigger-auth-aws
