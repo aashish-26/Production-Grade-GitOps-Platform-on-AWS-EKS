@@ -11,5 +11,4 @@ imageUpdater:
   enabled: false
 serviceAccount:
   annotations:
-    # TODO: set production IRSA role ARN here
-    {}
+    eks.amazonaws.com/role-arn: arn:aws:iam::848928399250:role/gitops-api-prod

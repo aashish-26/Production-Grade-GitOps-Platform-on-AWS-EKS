@@ -26,7 +26,7 @@ awsRegion: "ap-south-1"
 
 serviceAccount:
   create: true
-  name: null
+  name: worker-sa
   annotations: {}
 
 imageUpdater:

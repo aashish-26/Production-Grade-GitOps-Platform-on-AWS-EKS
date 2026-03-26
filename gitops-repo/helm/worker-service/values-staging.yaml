@@ -10,5 +10,4 @@ imageUpdater:
   enabled: true
 serviceAccount:
   annotations:
-    # TODO: annotate with eks.amazonaws.com/role-arn for IRSA
-    {}
+    eks.amazonaws.com/role-arn: arn:aws:iam::848928399250:role/gitops-worker-staging

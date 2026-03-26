@@ -6,3 +6,7 @@ image:
 replicaCount: 1
 hpa:
   enabled: false
+
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::848928399250:role/gitops-api-dev

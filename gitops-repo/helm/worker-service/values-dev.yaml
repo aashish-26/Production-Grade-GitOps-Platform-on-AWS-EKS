@@ -1,0 +1,4 @@
+# Dev overrides for worker
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::848928399250:role/gitops-worker-dev

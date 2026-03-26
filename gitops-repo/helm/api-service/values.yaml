@@ -43,5 +43,5 @@ livenessProbe:
 
 serviceAccount:
   create: true
-  name: null
+  name: api-sa
   annotations: {}
