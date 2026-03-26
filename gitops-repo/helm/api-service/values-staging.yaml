@@ -1,7 +1,7 @@
 # Staging overrides
 image:
   repository: "848928399250.dkr.ecr.ap-south-1.amazonaws.com/api-service"
-  tag: "" # CI will update with commit SHA on promotion
+  tag: "latest" # replace with promoted immutable tag when ready
 replicaCount: 2
 hpa:
   enabled: true

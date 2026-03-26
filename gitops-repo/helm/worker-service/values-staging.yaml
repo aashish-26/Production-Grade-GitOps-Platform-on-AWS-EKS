@@ -1,7 +1,7 @@
 # Staging overrides for worker
 image:
   repository: "848928399250.dkr.ecr.ap-south-1.amazonaws.com/worker-service"
-  tag: ""
+  tag: "latest"
 replicaCount: 1
 keda:
   minReplicaCount: 1

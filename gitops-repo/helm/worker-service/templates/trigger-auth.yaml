@@ -4,4 +4,4 @@ metadata:
   name: keda-trigger-auth-aws
 spec:
   podIdentity:
-    provider: aws-iam
+    provider: aws-eks
