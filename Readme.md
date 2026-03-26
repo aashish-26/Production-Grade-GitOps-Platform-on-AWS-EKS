@@ -68,6 +68,23 @@ aws eks update-kubeconfig --region <region> --name <cluster>
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 ```
 
+### 3.1 Access ArgoCD UI (private clusters)
+
+If your nodes are in private subnets, use port-forwarding:
+
+```bash
+kubectl -n argocd port-forward svc/argocd-server 8080:443
+```
+
+Open https://localhost:8080
+
+Get the admin password (PowerShell):
+
+```powershell
+$pw = kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}"
+[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($pw))
+```
+
 ### 4. Deploy GitOps Applications
 
 ```bash
