@@ -82,10 +82,10 @@ jobs:
           cd gitops
           git checkout $GITOPS_BRANCH || git checkout -b $GITOPS_BRANCH
           # Update values-dev.yaml: replace image.tag for API and worker
-          sed -i 's/tag:.*/tag: "'"$IMAGE_TAG"'"/' helm/api-service/values-dev.yaml
-          sed -i 's/tag:.*/tag: "'"$IMAGE_TAG"'"/' helm/worker-service/values.yaml
-          git add helm/api-service/values-dev.yaml
-          git add helm/worker-service/values.yaml
+          sed -i 's/tag:.*/tag: "'"$IMAGE_TAG"'"/' gitops-repo/helm/api-service/values-dev.yaml
+          sed -i 's/tag:.*/tag: "'"$IMAGE_TAG"'"/' gitops-repo/helm/worker-service/values-dev.yaml
+          git add gitops-repo/helm/api-service/values-dev.yaml
+          git add gitops-repo/helm/worker-service/values-dev.yaml
           git config user.email "ci-bot@users.noreply.github.com"
           git config user.name "ci-bot"
           git commit -m "chore: update images to $IMAGE_TAG [ci skip]"
