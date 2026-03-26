@@ -7,7 +7,7 @@ image:
 
 sqs:
   # TODO: set per environment
-  queueUrl: ""
+  queueUrl: "https://sqs.ap-south-1.amazonaws.com/848928399250/gitops-app-queue"
 awsRegion: "ap-south-1"
 
 # Annotations consumed by ArgoCD Image Updater or other tooling
