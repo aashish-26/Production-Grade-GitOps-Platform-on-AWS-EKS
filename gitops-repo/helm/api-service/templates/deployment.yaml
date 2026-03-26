@@ -4,10 +4,10 @@ metadata:
   name: {{ include "api-service.fullname" . }}
   labels:
     app: {{ include "api-service.name" . }}
-  annotations: |
-    {{- with .Values.imageUpdater.annotations }}
-    {{ toYaml . | nindent 4 }}
-    {{- end }}
+{{- with .Values.imageUpdater.annotations }}
+  annotations:
+{{ toYaml . | nindent 4 }}
+{{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
