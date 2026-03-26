@@ -1,4 +1,7 @@
 # Dev overrides for worker
+image:
+  repository: "848928399250.dkr.ecr.ap-south-1.amazonaws.com/worker-service"
+  tag: "latest"
 serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::848928399250:role/gitops-worker-dev
