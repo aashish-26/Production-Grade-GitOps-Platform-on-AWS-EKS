@@ -21,5 +21,6 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN addgroup --system app && adduser --system --ingroup app app
 USER app
 WORKDIR /app
+COPY --from=build /app /app
 
 CMD ["python", "worker.py"]
