@@ -3,12 +3,15 @@ kind: Application
 metadata:
   name: gitops-root
   namespace: argocd
+  annotations:
+    # Allow Image Updater to discover the apps; set actual image-list in child app manifests or here.
+    argocd-image-updater.argoproj.io/image-list: "api-service=848928399250.dkr.ecr.ap-south-1.amazonaws.com/api-service,worker-service=848928399250.dkr.ecr.ap-south-1.amazonaws.com/worker-service"
 spec:
   project: default
   source:
-    repoURL: "# TODO: ADD_GITOPS_REPO_URL"
+    repoURL: "https://github.com/aashish-26/Production-Grade-GitOps-Platform-on-AWS-EKS.git"
     targetRevision: HEAD
-    path: argocd/apps
+    path: gitops-repo/argocd/apps
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
@@ -16,9 +19,5 @@ spec:
     automated: {}
     syncOptions:
     - CreateNamespace=true
-  metadata:
-    annotations:
-      # Allow Image Updater to discover the apps; set actual image-list in child app manifests or here.
-      argocd-image-updater.argoproj.io/image-list: "api-service=${ECR_API_REPO},worker-service=${ECR_WORKER_REPO}"
 
 # Child app manifests should live in argocd/apps/ (dev.yaml, staging.yaml, prod.yaml)

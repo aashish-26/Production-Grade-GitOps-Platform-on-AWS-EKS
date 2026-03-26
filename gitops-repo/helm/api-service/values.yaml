@@ -5,6 +5,11 @@ image:
   tag: "latest"
   pullPolicy: IfNotPresent
 
+sqs:
+  # TODO: set per environment
+  queueUrl: ""
+awsRegion: "ap-south-1"
+
 # Annotations consumed by ArgoCD Image Updater or other tooling
 imageUpdater:
   enabled: false

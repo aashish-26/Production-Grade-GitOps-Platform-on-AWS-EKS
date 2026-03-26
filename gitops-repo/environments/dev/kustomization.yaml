@@ -1,9 +1,0 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-	- ../../helm/api-service
-	- ../../helm/worker-service
-
-# For Helm-based charts, ArgoCD can use Helm directly; this kustomize file is illustrative.
-patchesStrategicMerge:
-	- ../../secrets/external-secret.yaml

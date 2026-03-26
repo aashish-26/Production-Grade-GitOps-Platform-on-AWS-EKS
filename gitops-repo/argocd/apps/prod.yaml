@@ -6,13 +6,14 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: "# TODO: ADD_GITOPS_REPO_URL"
+    repoURL: "https://github.com/aashish-26/Production-Grade-GitOps-Platform-on-AWS-EKS.git"
     targetRevision: HEAD
-    path: environments/prod
+    path: gitops-repo/environments/prod
   destination:
     server: https://kubernetes.default.svc
     namespace: prod
   syncPolicy:
-    automated: {}
+    # For production we recommend manual sync. Disable automated sync to force approvals via Git.
+    automated: null
   # NOTE: For production we recommend disabling automated sync and using manual promotion
   # TODO: set automated to false and use ArgoCD App/Sync approvals or protect the prod branch

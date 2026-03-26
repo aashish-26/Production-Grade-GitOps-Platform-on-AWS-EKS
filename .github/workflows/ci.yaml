@@ -35,8 +35,10 @@ jobs:
       - name: Set image variables
         run: |
           IMAGE_REPO_API=${{ secrets.ECR_API_REPO }} # TODO: USER_ACTION_REQUIRED set in repo secrets
+          IMAGE_REPO_WORKER=${{ secrets.ECR_WORKER_REPO }} # TODO: USER_ACTION_REQUIRED set in repo secrets
           IMAGE_TAG=${{ github.sha }}
           echo "IMAGE_REPO_API=$IMAGE_REPO_API" >> $GITHUB_ENV
+          echo "IMAGE_REPO_WORKER=$IMAGE_REPO_WORKER" >> $GITHUB_ENV
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Build API image
@@ -44,28 +46,48 @@ jobs:
           docker build -t $IMAGE_REPO_API:$IMAGE_TAG -f app-repo/api/Dockerfile app-repo/api
 
       - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@v2
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: $IMAGE_REPO_API:${{ env.IMAGE_TAG }}
+          format: 'table'
+
+      - name: Build worker image
+        run: |
+          docker build -t $IMAGE_REPO_WORKER:$IMAGE_TAG -f app-repo/worker/Dockerfile app-repo/worker
+
+      - name: Scan worker image with Trivy
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          image-ref: $IMAGE_REPO_WORKER:${{ env.IMAGE_TAG }}
           format: 'table'
 
       - name: Push image to ECR
         run: |
           docker push $IMAGE_REPO_API:$IMAGE_TAG
 
+      - name: Push worker image to ECR
+        run: |
+          docker push $IMAGE_REPO_WORKER:$IMAGE_TAG
+
       - name: Update GitOps repo (helm values)
         env:
           GITOPS_REPO: ${{ secrets.GITOPS_REPO }} # TODO: ADD REPO URL
           GITOPS_BRANCH: main
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN }} # TODO: PAT with repo write access
         run: |
           # This step clones the GitOps repo, updates the values file for dev (example), and pushes a commit.
-          git clone $GITOPS_REPO gitops
+          AUTHED_REPO=${GITOPS_REPO/https:\/\//https:\/\/$GITOPS_TOKEN@}
+          git clone $AUTHED_REPO gitops
           cd gitops
           git checkout $GITOPS_BRANCH || git checkout -b $GITOPS_BRANCH
-          # Update values-dev.yaml: replace image.tag
+          # Update values-dev.yaml: replace image.tag for API and worker
           sed -i 's/tag:.*/tag: "'"$IMAGE_TAG"'"/' helm/api-service/values-dev.yaml
+          sed -i 's/tag:.*/tag: "'"$IMAGE_TAG"'"/' helm/worker-service/values.yaml
           git add helm/api-service/values-dev.yaml
-          git commit -m "chore: update api image to $IMAGE_TAG [ci skip]"
+          git add helm/worker-service/values.yaml
+          git config user.email "ci-bot@users.noreply.github.com"
+          git config user.name "ci-bot"
+          git commit -m "chore: update images to $IMAGE_TAG [ci skip]"
           git push origin HEAD:$GITOPS_BRANCH
 

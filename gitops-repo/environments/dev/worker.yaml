@@ -1,16 +1,23 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: staging-apps
+  name: worker-dev
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: "https://github.com/aashish-26/Production-Grade-GitOps-Platform-on-AWS-EKS.git"
     targetRevision: HEAD
-    path: gitops-repo/environments/staging
+    path: gitops-repo/helm/worker-service
+    helm:
+      valueFiles:
+      - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: staging
+    namespace: dev
   syncPolicy:
-    automated: {}
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

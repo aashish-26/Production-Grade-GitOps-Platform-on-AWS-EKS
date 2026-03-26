@@ -1,6 +1,6 @@
 # Staging overrides for worker
 image:
-  repository: "# TODO: set with ECR repo URL for worker"
+  repository: "848928399250.dkr.ecr.ap-south-1.amazonaws.com/worker-service"
   tag: ""
 replicaCount: 1
 keda:

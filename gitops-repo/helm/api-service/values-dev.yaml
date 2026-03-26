@@ -1,6 +1,6 @@
 # Dev overrides - auto-deploy by CI
 image:
-  repository: "# TODO: override with ECR API repo URL"
+  repository: "848928399250.dkr.ecr.ap-south-1.amazonaws.com/api-service"
   tag: "" # replaced by CI
   pullPolicy: IfNotPresent
 replicaCount: 1

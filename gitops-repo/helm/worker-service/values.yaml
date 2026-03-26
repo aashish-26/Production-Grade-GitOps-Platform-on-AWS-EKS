@@ -1,7 +1,7 @@
 # Default values for worker-service
 replicaCount: 1
 image:
-  repository: "# TODO: set in env specific values"
+  repository: "848928399250.dkr.ecr.ap-south-1.amazonaws.com/worker-service"
   tag: "latest"
   pullPolicy: IfNotPresent
 resources:
@@ -20,8 +20,9 @@ keda:
   cooldownPeriod: 300
 
 sqs:
+  # TODO: set per environment
   queueUrl: ""
-awsRegion: "# TODO: set region"
+awsRegion: "ap-south-1"
 
 serviceAccount:
   create: true
