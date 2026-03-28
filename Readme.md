@@ -91,6 +91,51 @@ $pw = kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.da
 kubectl apply -f argocd/app-of-apps.yaml
 ```
 
+### 5. Install Monitoring (Prometheus, Grafana, Loki)
+
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+
+kubectl create ns monitoring
+helm install monitoring prometheus-community/kube-prometheus-stack -n monitoring
+helm install loki grafana/loki-stack -n monitoring
+```
+
+### 6. Install KEDA (event-driven autoscaling)
+
+```bash
+helm repo add kedacore https://kedacore.github.io/charts
+helm repo update
+
+kubectl create ns keda
+helm install keda kedacore/keda -n keda
+```
+
+---
+
+## Helm Usage in This Project
+
+Helm packages the Kubernetes manifests for each service. ArgoCD renders the charts
+and applies them per environment.
+
+- API chart: gitops-repo/helm/api-service
+- Worker chart: gitops-repo/helm/worker-service
+
+---
+
+## Why SQS
+
+SQS decouples the API from background processing:
+
+1) API receives a request
+2) API pushes a message to SQS
+3) Worker consumes messages and processes jobs
+
+This buffers traffic spikes, keeps the API responsive, and enables worker
+autoscaling with KEDA.
+
 ---
 
 ## Implementation Phases
@@ -109,6 +154,33 @@ kubectl apply -f argocd/app-of-apps.yaml
 * ArgoCD dashboard
 * Grafana dashboards
 * CI pipeline execution
+
+---
+
+## Monitoring Dashboards and Alerts
+
+Dashboards and alerts are stored in:
+
+- gitops-repo/monitoring/dashboards
+- gitops-repo/monitoring/alerts
+
+Apply them to the cluster:
+
+```bash
+kubectl apply -f gitops-repo/monitoring/dashboards/dashboard-configmaps.yaml
+kubectl apply -f gitops-repo/monitoring/alerts/prometheus-rules.yaml
+```
+
+Note: The SQS queue depth panel and alert require an SQS metric exporter or a
+Prometheus integration that exposes `sqs_approximate_number_of_messages_visible`.
+
+---
+
+## Repo Split (Optional)
+
+If you want to split into separate repos (app/infra/gitops), see:
+
+- repo-split.md
 
 ---
 

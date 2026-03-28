@@ -1,0 +1,5 @@
+{
+  "yaml.schemas": {
+    "./.vscode/schemas/prometheusrule-monitoring.coreos.com.json": "gitops-repo/monitoring/alerts/prometheus-rules.yaml"
+  }
+}

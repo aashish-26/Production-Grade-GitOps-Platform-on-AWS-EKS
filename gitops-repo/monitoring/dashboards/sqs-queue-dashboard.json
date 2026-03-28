@@ -1,0 +1,21 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "SQS Queue Depth",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sqs_approximate_number_of_messages_visible{queue=\"gitops-app-queue\"}",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 30,
+  "version": 1,
+  "title": "SQS Queue Depth"
+}
