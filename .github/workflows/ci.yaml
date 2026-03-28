@@ -85,7 +85,11 @@ jobs:
           AUTHED_REPO=${GITOPS_REPO/https:\/\//https:\/\/$GITOPS_TOKEN@}
           git clone $AUTHED_REPO gitops
           cd gitops
+          git fetch origin $GITOPS_UPDATE_BRANCH || true
           git checkout -B $GITOPS_UPDATE_BRANCH
+          if git show-ref --verify --quiet refs/remotes/origin/$GITOPS_UPDATE_BRANCH; then
+            git reset --hard origin/$GITOPS_UPDATE_BRANCH
+          fi
           # Update values-dev.yaml: replace image.tag for API and worker
           sed -i 's/tag:.*/tag: "'"$IMAGE_TAG"'"/' gitops-repo/helm/api-service/values-dev.yaml
           sed -i 's/tag:.*/tag: "'"$IMAGE_TAG"'"/' gitops-repo/helm/worker-service/values-dev.yaml
@@ -98,7 +102,7 @@ jobs:
           git config user.email "ci-bot@users.noreply.github.com"
           git config user.name "ci-bot"
           git commit -m "chore: update images to $IMAGE_TAG [ci skip]"
-          git push origin HEAD:$GITOPS_UPDATE_BRANCH
+          git push --force-with-lease origin HEAD:$GITOPS_UPDATE_BRANCH
 
           REPO_PATH=${GITOPS_REPO#https://github.com/}
           REPO_PATH=${REPO_PATH%.git}
