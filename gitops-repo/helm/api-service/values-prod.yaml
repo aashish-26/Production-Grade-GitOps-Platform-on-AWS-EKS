@@ -9,6 +9,9 @@ hpa:
   maxReplicas: 12
 imageUpdater:
   enabled: false
+
+ingress:
+  enabled: false
 serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::848928399250:role/gitops-api-prod

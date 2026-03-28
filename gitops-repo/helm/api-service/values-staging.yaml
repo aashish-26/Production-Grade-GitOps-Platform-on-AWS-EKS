@@ -9,6 +9,9 @@ hpa:
   maxReplicas: 6
 imageUpdater:
   enabled: true
+
+ingress:
+  enabled: false
 serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::848928399250:role/gitops-api-staging

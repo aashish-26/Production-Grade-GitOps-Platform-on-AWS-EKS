@@ -17,6 +17,9 @@ imageUpdater:
 service:
   type: ClusterIP
   port: 8080
+
+ingress:
+  enabled: false
 resources:
   requests:
     cpu: 100m
