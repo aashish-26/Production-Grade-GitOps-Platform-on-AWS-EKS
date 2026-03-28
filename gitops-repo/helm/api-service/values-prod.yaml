@@ -1,7 +1,7 @@
 # Prod overrides
 image:
   repository: "848928399250.dkr.ecr.ap-south-1.amazonaws.com/api-service"
-  tag: "" # Set to promoted immutable tag
+  tag: "b65b2a5a5abcaf595ad07142f17b39a665cd1e78" # Set to promoted immutable tag
 replicaCount: 3
 hpa:
   enabled: true
