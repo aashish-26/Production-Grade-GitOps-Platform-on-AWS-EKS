@@ -1,7 +1,7 @@
 # Dev overrides - auto-deploy by CI
 image:
   repository: "848928399250.dkr.ecr.ap-south-1.amazonaws.com/api-service"
-  tag: "7088822c136ab1b9ba5768a15dae157a9e280506"
+  tag: "a42cf70305b773402d38fadcf0794daed5f62f39"
   pullPolicy: IfNotPresent
 replicaCount: 1
 hpa:
