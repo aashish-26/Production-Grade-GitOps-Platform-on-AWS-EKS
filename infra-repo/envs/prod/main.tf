@@ -1,7 +1,15 @@
-// Prod environment Terraform root (stub). Use strict review before applying.
+// Prod environment Terraform root
+// Mirrors dev wiring to reduce drift risk.
 
 terraform {
   required_version = ">= 1.5.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 6.28.0"
+    }
+  }
 }
 
 provider "aws" {
@@ -10,18 +18,21 @@ provider "aws" {
 
 module "vpc" {
   source = "../../modules/vpc"
-  cidr       = var.vpc_cidr
-  aws_region = var.aws_region
-  tags       = var.tags
+
+  cidr = var.vpc_cidr
+  tags = var.tags
 }
 
 module "eks" {
   source = "../../modules/eks"
-  cluster_name = var.cluster_name
-  vpc_id       = module.vpc.vpc_id
-  subnet_ids   = module.vpc.private_subnets
-  aws_region   = var.aws_region
-  tags         = var.tags
+
+  cluster_name       = var.cluster_name
+  kubernetes_version = var.kubernetes_version
+
+  vpc_id             = module.vpc.vpc_id
+  private_subnet_ids = module.vpc.private_subnets
+
+  tags = var.tags
 }
 
 module "ecr" {

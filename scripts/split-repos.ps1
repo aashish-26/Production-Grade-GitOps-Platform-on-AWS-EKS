@@ -1,5 +1,6 @@
 $ErrorActionPreference = "Stop"
 
+# Creates separate app/infra/gitops folders with fresh git history.
 $root = (Get-Location).Path
 $dest = Join-Path $root "split-repos"
 

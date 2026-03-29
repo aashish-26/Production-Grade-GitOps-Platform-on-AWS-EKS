@@ -1,5 +1,6 @@
 $ErrorActionPreference = "Stop"
 
+# Cluster and account context
 $region = "ap-south-1"
 $clusterName = "gitops-dev-cluster"
 $accountId = "848928399250"

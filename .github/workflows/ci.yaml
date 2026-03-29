@@ -49,7 +49,7 @@ jobs:
       - name: Scan image with Trivy
         uses: aquasecurity/trivy-action@0.35.0
         with:
-          image-ref: ${{ env.IMAGE_REPO_API }}:${{ env.IMAGE_TAG }}
+          image-ref: ${{ secrets.ECR_API_REPO }}:${{ github.sha }}
           format: 'table'
 
       - name: Build worker image
@@ -60,7 +60,7 @@ jobs:
       - name: Scan worker image with Trivy
         uses: aquasecurity/trivy-action@0.35.0
         with:
-          image-ref: ${{ env.IMAGE_REPO_WORKER }}:${{ env.IMAGE_TAG }}
+          image-ref: ${{ secrets.ECR_WORKER_REPO }}:${{ github.sha }}
           format: 'table'
 
       - name: Push image to ECR
@@ -77,7 +77,7 @@ jobs:
         env:
           GITOPS_REPO: ${{ secrets.GITOPS_REPO }} # TODO: ADD REPO URL
           GITOPS_BRANCH: main
-          GITOPS_UPDATE_BRANCH: gitops-update
+          GITOPS_UPDATE_BRANCH: gitops-update # Reused branch to keep a single rolling PR
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
           GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN }} # TODO: PAT with repo write access
         run: |

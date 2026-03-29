@@ -1,3 +1,4 @@
+# Grafana auto-imports dashboards from ConfigMaps labeled grafana_dashboard: "1".
 apiVersion: v1
 kind: ConfigMap
 metadata:

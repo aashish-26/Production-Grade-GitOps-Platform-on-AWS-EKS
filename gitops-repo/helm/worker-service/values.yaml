@@ -20,13 +20,14 @@ keda:
   cooldownPeriod: 300
 
 sqs:
-  # TODO: set per environment
+  # TODO: set per environment (queue URL used by the worker to receive jobs)
   queueUrl: "https://sqs.ap-south-1.amazonaws.com/848928399250/gitops-app-queue"
 awsRegion: "ap-south-1"
 
 serviceAccount:
   create: true
   name: worker-sa
+  # IRSA annotation goes here per environment values
   annotations: {}
 
 imageUpdater:

@@ -1,3 +1,4 @@
+# PrometheusRule resources; requires kube-prometheus-stack CRDs in the cluster.
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
